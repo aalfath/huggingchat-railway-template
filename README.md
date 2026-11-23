@@ -1,3 +1,5 @@
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new/template/huggingchat?utm_medium=integration&utm_source=button&utm_campaign=huggingchat)
+
 # HuggingChat on Railway
 
 This repo packages [HuggingChat](https://github.com/huggingface/chat-ui) (Hugging Face's open-source `chat-ui`, the app behind huggingface.co/chat) as a one-click Railway template. It talks to any OpenAI-compatible API: the Hugging Face Inference router by default, or OpenAI, OpenRouter, Groq, Together, a vLLM/Ollama server and so on.
@@ -23,12 +25,20 @@ Upstream's latest release is `v0.10.0` (2026-05-11), but its release image was n
 | HuggingChat | `PUBLIC_ORIGIN` | `https://${{RAILWAY_PUBLIC_DOMAIN}}` | Public URL, used for share links. |
 | HuggingChat | `PORT` | `8080` | Port the proxy listens on. |
 | MongoDB | `MONGO_INITDB_ROOT_USERNAME` / `MONGO_INITDB_ROOT_PASSWORD` | `mongo` / generated | Database login, used only on the private network. |
+| MongoDB | `MONGO_REPLICA_KEY` | generated | Key for the single-node replica set `rs0` (chat-ui's migrations use transactions). |
+| MongoDB | `MONGO_URL` | built from the above | Connection string the HuggingChat service references. |
 
 Any other `chat-ui` setting from upstream's [`.env`](https://github.com/huggingface/chat-ui/blob/main/.env) can be added as a variable on the HuggingChat service (for example `MODELS`, `TASK_MODEL`, `PUBLIC_APP_NAME`, `OPENID_*` for single sign-on, `MCP_SERVERS`).
 
 ## Why a password proxy?
 
 `chat-ui` has no built-in user accounts unless you configure OpenID Connect, so anyone who finds the URL could chat on your API key. The proxy asks for `BASIC_AUTH_USER` / `BASIC_AUTH_PASSWORD` and passes the username to `chat-ui` (`TRUSTED_EMAIL_HEADER`), so your conversations follow you across browsers and devices.
+
+## After deploy
+
+1. Open the service's public URL and sign in with `admin` and the generated `BASIC_AUTH_PASSWORD` (HuggingChat service → Variables).
+2. Pick a model from the list (discovered from your endpoint) and start chatting.
+3. To switch providers, change `OPENAI_BASE_URL` and `OPENAI_API_KEY` and redeploy.
 
 ## Memory
 
